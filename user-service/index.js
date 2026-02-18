@@ -77,8 +77,39 @@ app.get('/users/:id', async (req, res) => {
   }
 });
 
+const initDB = async () => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(100) UNIQUE NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  const { rowCount } = await pool.query('SELECT 1 FROM users LIMIT 1');
+  if (rowCount === 0) {
+    await pool.query(`
+      INSERT INTO users (name, email) VALUES
+        ('Alice Johnson', 'alice@example.com'),
+        ('Bob Smith', 'bob@example.com')
+    `);
+  }
+};
+
+// Health check
+// Verify the database connection is alive and the service is running
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status: 'User Service is running and database is connected' });
+  } catch (err) {
+    res.status(500).json({ error: 'Database connection failed' });
+  }
+});
+
 // Start server after DB is ready
-waitForDB().then(() => {
+waitForDB().then(async () => {
+  await initDB();
   app.listen(PORT, () => {
     console.log(`User Service running on port ${PORT}`);
   });
