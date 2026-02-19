@@ -1,7 +1,8 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const authcheck = require('./middleware/authcheck');
-import { rateLimit } from 'express-rate-limit'
+// import { rateLimit } from 'express-rate-limit'
+const { rateLimit } = require('express-rate-limit');
 
 const app = express();
 const PORT = 3000;
@@ -38,6 +39,9 @@ app.use('/api/orders', authcheck, createProxyMiddleware({
 app.get('/health', (req, res) => {
   res.json({ status: 'Gateway is running' });
 });
+
+
+
 
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);

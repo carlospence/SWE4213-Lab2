@@ -1,0 +1,24 @@
+meta {
+  name: 6 - Empty Price Field - Create New Product
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/products
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {"name": "Keyboard", "description": "Mechanical keyboard", "price": ""}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

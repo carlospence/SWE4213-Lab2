@@ -1,0 +1,29 @@
+meta {
+  name: 7 - RateLimiting - Get Users
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/users
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+tests {
+  // Verify that the status is 429 when rate limited
+  if (res.getStatus() === 429) {
+    test("Rate limit exceeded, Too many Request", function() {
+      expect(res.getStatus()).to.equal(429);
+    });
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,24 @@
+meta {
+  name: 8 - Empty Description Field - Create New Product
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/products
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {"name": "", "description": "", "price": 149.99}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

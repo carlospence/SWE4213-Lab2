@@ -1,0 +1,20 @@
+meta {
+  name: 5 - Get Invalid Order By ID
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/orders/9999
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

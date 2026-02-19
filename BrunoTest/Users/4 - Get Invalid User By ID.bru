@@ -1,0 +1,20 @@
+meta {
+  name: 4 - Get Invalid User By ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/users/100
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

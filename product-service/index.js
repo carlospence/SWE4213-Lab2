@@ -58,10 +58,19 @@ app.post('/products', async (req, res) => {
   if (!name || !description || price === undefined) {
     return res.status(400).json({ error: 'Name, description, and price are required' });
   }
+  // Validate price is a number (allow numeric strings)
+  const priceNum = Number(price);
+  if (!Number.isFinite(priceNum)) {
+    return res.status(400).json({ error: 'Price must be a valid number' });
+  }
+  // Ensure price is not negative
+  if (priceNum <= 0) {
+    return res.status(400).json({ error: 'Price must be greater than 0' });
+  }
   try {
     const result = await pool.query(
       'INSERT INTO products (name, description, price) VALUES ($1, $2, $3) RETURNING *',
-      [name, description, price]
+      [name, description, priceNum]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {

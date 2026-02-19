@@ -1,0 +1,28 @@
+meta {
+  name: 8 - Rate Limiting - List Orders
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/orders
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+tests {
+  if (res.getStatus() === 429) {
+    test("Rate limit exceeded, Too many Request", function() {
+      expect(res.getStatus()).to.equal(429);
+    });
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

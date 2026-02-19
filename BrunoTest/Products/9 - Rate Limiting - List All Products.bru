@@ -1,0 +1,28 @@
+meta {
+  name: 9 - Rate Limiting - List All Products
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/products
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+tests {
+  if (res.getStatus() === 429) {
+    test("Rate limit exceeded, Too many Request", function() {
+      expect(res.getStatus()).to.equal(429);
+    });
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
