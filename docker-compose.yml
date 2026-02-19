@@ -7,9 +7,12 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - user-service
-      - product-service
-      - order-service
+      user-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
     networks:
       - app-network
     healthcheck:
@@ -17,6 +20,7 @@ services:
           interval: 10s
           timeout: 5s
           retries: 5
+          start_period: 10s
     environment:
       - JWT_SECRET=unb_microservices_deployment_key
 
@@ -43,6 +47,7 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
+        start_period: 10s
 
   user-db:
     image: postgres:15-alpine
@@ -93,6 +98,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   product-db:
     image: postgres:15-alpine
@@ -139,9 +145,13 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
     depends_on:
-      - order-db
-      - user-service
-      - product-service
+      order-db:
+        condition: service_started
+      user-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+        
     networks:
       - app-network
     healthcheck:
@@ -149,6 +159,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   order-db:
     image: postgres:15-alpine

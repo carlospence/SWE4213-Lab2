@@ -1,5 +1,7 @@
 # Lab 2: Docker & Docker Compose - Microservices E-Commerce Application
 
+# (CHARLES EWAIFOH EJEDAWE - 3789602)
+
 ## Learning Objectives
 
 By the end of this lab, you will be able to:
@@ -43,10 +45,12 @@ docker compose version
 Each service has its own database (the **database-per-service** pattern). The **API Gateway** routes external requests to the appropriate service. The **Order Service** communicates with both the User Service and Product Service to validate data before creating orders.
 
 **What's provided:**
+
 - Gateway (complete)
 - User Service + user-db (complete) -- use this as your **reference implementation**
 
 **What you'll build:**
+
 - Product Service + product-db
 - Order Service + order-db
 - Complete the `docker-compose.yml`
@@ -61,11 +65,12 @@ Before writing any code, read through the reference implementation to understand
 
 Open `gateway/index.js`. The gateway uses `http-proxy-middleware` to route requests:
 
-| Incoming Request     | Routed To                              |
-|----------------------|----------------------------------------|
-| `GET /api/users`     | `http://user-service:3001/users`       |
-| `GET /api/products`  | `http://product-service:3002/products` |
-| `GET /api/orders`    | `http://order-service:3003/orders`     |
+
+| Incoming Request    | Routed To                              |
+| --------------------- | ---------------------------------------- |
+| `GET /api/users`    | `http://user-service:3001/users`       |
+| `GET /api/products` | `http://product-service:3002/products` |
+| `GET /api/orders`   | `http://order-service:3003/orders`     |
 
 Notice that the gateway refers to services by their **container name** (e.g., `user-service`), not `localhost`. This is because Docker Compose creates a shared network where containers can reach each other by service name.
 
@@ -76,6 +81,7 @@ This is your **reference implementation**. Study it carefully -- you'll follow t
 Key things to note:
 
 1. **Database connection** using `pg.Pool` with environment variables:
+
    ```javascript
    const pool = new Pool({
      host: process.env.DB_HOST || 'user-db',
@@ -85,10 +91,9 @@ Key things to note:
      password: process.env.DB_PASSWORD || 'postgres',
    });
    ```
-
 2. **Wait for database** -- the `waitForDB` function retries the connection because the database container may take a few seconds to start.
-
 3. **Database initialization** -- the `initDB` function creates the database table on startup using `CREATE TABLE IF NOT EXISTS`, and inserts seed data if the table is empty. This is critical because when the images run from a Docker registry there are no `init.sql` files to mount into the database container. Each service must create its own tables in code:
+
    ```javascript
    const initDB = async () => {
      await pool.query(`
@@ -109,8 +114,8 @@ Key things to note:
      }
    };
    ```
-
 4. **Startup chain** -- the server starts only after both the database connection and schema initialization succeed:
+
    ```javascript
    waitForDB().then(async () => {
      await initDB();
@@ -119,7 +124,6 @@ Key things to note:
      });
    });
    ```
-
 5. **Three REST endpoints**: `GET /users`, `POST /users`, `GET /users/:id`
 
 ### 1.3 Database Initialization (`init.sql` vs `initDB`)
@@ -162,15 +166,16 @@ Open `docker-compose.yml` and study the provided entries for `gateway`, `user-se
 
 Key Docker Compose concepts demonstrated:
 
-| Concept          | Example                                           | Purpose                                                |
-|------------------|---------------------------------------------------|--------------------------------------------------------|
-| `build`          | `build: ./user-service`                           | Build image from a Dockerfile in the specified directory |
-| `ports`          | `"3001:3001"`                                     | Map host port to container port                         |
-| `environment`    | `DB_HOST: user-db`                                | Set environment variables inside the container          |
-| `depends_on`     | `depends_on: - user-db`                           | Start dependencies first (does not wait for readiness)  |
-| `volumes`        | `user-data:/var/lib/postgresql/data`              | Persist database data across container restarts         |
-| `volumes` (bind) | `./user-service/init.sql:/docker-entrypoint-...`  | Mount a file from host into the container               |
-| `networks`       | `networks: - app-network`                         | Place containers on a shared network                    |
+
+| Concept          | Example                                          | Purpose                                                  |
+| ------------------ | -------------------------------------------------- | ---------------------------------------------------------- |
+| `build`          | `build: ./user-service`                          | Build image from a Dockerfile in the specified directory |
+| `ports`          | `"3001:3001"`                                    | Map host port to container port                          |
+| `environment`    | `DB_HOST: user-db`                               | Set environment variables inside the container           |
+| `depends_on`     | `depends_on: - user-db`                          | Start dependencies first (does not wait for readiness)   |
+| `volumes`        | `user-data:/var/lib/postgresql/data`             | Persist database data across container restarts          |
+| `volumes` (bind) | `./user-service/init.sql:/docker-entrypoint-...` | Mount a file from host into the container                |
+| `networks`       | `networks: - app-network`                        | Place containers on a shared network                     |
 
 ---
 
@@ -181,6 +186,7 @@ Now it's your turn! Open `product-service/index.js`. You'll see skeleton code wi
 ### 4.1 Database Connection Pool
 
 Fill in the `Pool` configuration. Use the same pattern as `user-service/index.js`, but with defaults appropriate for the product database:
+
 - Default host: `product-db`
 - Default database name: `productdb`
 
@@ -203,6 +209,7 @@ Query: INSERT INTO products (name, description, price) VALUES ($1, $2, $3) RETUR
 ```
 
 Remember to:
+
 - Validate that required fields are present (return 400 if missing)
 - Return 201 status on success
 
@@ -243,6 +250,7 @@ Open `order-service/index.js`. This service is more complex because it communica
 ### 5.1 Database Connection Pool
 
 Same pattern as before, but with defaults for the order database:
+
 - Default host: `order-db`
 - Default database name: `orderdb`
 
@@ -330,11 +338,13 @@ Watch the logs. You should see all services start and connect to their databases
 Open a new terminal and run these commands:
 
 **Test the Gateway health check:**
+
 ```bash
 curl http://localhost:3000/health
 ```
 
 **Test User Service (provided -- should work immediately):**
+
 ```bash
 # List users (should return seed data)
 curl http://localhost:3000/api/users
@@ -349,6 +359,7 @@ curl http://localhost:3000/api/users/1
 ```
 
 **Test Product Service (your code):**
+
 ```bash
 # List products (should return seed data)
 curl http://localhost:3000/api/products
@@ -363,6 +374,7 @@ curl http://localhost:3000/api/products/1
 ```
 
 **Test Order Service (your code):**
+
 ```bash
 # Create an order (should validate user and product exist)
 curl -X POST http://localhost:3000/api/orders \
@@ -409,6 +421,7 @@ Each service should expose a `GET /health` endpoint that returns a `200` status 
 Once the endpoints are in place, configure Docker Compose `healthcheck` directives for each service. Update `depends_on` to use `condition: service_healthy` so that dependent services wait for their dependencies to be truly ready, not just started.
 
 Example `healthcheck` in `docker-compose.yml`:
+
 ```yaml
 healthcheck:
   test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
@@ -617,8 +630,15 @@ Your repository must include:
 4. **Published Docker images** -- your images must be pushed to Docker Hub as described in Part 13.
 
 I will grade your lab by:
+
 1. Pulling your Docker images from the registry and running them with the grading compose file (no source code, no build step).
 2. Verifying that all services start, connect to their databases, and create their own tables automatically.
 3. Running your Bruno test collection against the running services.
 
 ---
+
+## Docker Image Screenshot
+
+![](assets/20260219_023614_20260219_023601_Docker_Images_Screenshot.png)
+
+Note: For the JWT Authentication on the API Gateway, I used a pre-generated JWT Token that will be valid for a future time.
